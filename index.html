@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editarmorai — AI-Powered Video Editing</title>
+  <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;600;700&family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --glass-bg: rgba(255,255,255,0.55);
+      --glass-border: rgba(255,255,255,0.75);
+      --glass-shadow: rgba(180,200,230,0.25);
+      --blur: blur(28px);
+      --accent: #0a84ff;
+      --accent2: #5e5ce6;
+      --accent3: #32ade6;
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a6a;
+      --text-muted: #8888aa;
+      --bg-base: #eef2ff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-base);
+      color: var(--text-primary);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Custom Cursor */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transition: transform 0.15s ease;
+      mix-blend-mode: multiply;
+    }
+    .cursor-follower {
+      width: 36px; height: 36px;
+      border: 1.5px solid rgba(10,132,255,0.4);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9998;
+      transition: transform 0.35s cubic-bezier(.23,1,.32,1);
+      backdrop-filter: blur(4px);
+    }
+
+    /* Ambient Background */
+    .ambient {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      overflow: hidden;
+    }
+    .ambient-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.35;
+      animation: float 12s ease-in-out infinite;
+    }
+    .orb1 { width: 700px; height: 700px; background: radial-gradient(circle, #a8c8ff, #c8b4ff); top: -200px; left: -100px; animation-delay: 0s; }
+    .orb2 { width: 500px; height: 500px; background: radial-gradient(circle, #b4e4ff, #d0f4ff); top: 20%; right: -100px; animation-delay: -4s; }
+    .orb3 { width: 400px; height: 400px; background: radial-gradient(circle, #ffd6f0, #ffe4b8); bottom: 10%; left: 20%; animation-delay: -8s; }
+    .orb4 { width: 350px; height: 350px; background: radial-gradient(circle, #c4f0c8, #b8e4ff); bottom: -100px; right: 15%; animation-delay: -2s; }
+
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -40px) scale(1.05); }
+      66% { transform: translate(-20px, 20px) scale(0.95); }
+    }
+
+    /* Glass Utility */
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 40px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+      width: calc(100% - 48px); max-width: 1200px;
+      z-index: 1000;
+      border-radius: 20px;
+      padding: 14px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      animation: slideDown 0.8s cubic-bezier(.23,1,.32,1) both;
+    }
+    @keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-20px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+    .nav-logo {
+      font-family: 'Sora', sans-serif;
+      font-weight: 800; font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { -webkit-text-fill-color: transparent; }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none; border-radius: 12px;
+      padding: 10px 22px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 4px 20px rgba(10,132,255,0.35);
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(10,132,255,0.45); }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1;
+      padding: 120px 24px 80px;
+    }
+
+    .hero-inner {
+      max-width: 780px; text-align: center;
+    }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border-radius: 100px; padding: 8px 18px;
+      font-size: 0.82rem; font-weight: 500; color: var(--accent);
+      margin-bottom: 32px;
+      animation: fadeUp 0.8s 0.3s cubic-bezier(.23,1,.32,1) both;
+    }
+    .hero-badge .dot { width: 7px; height: 7px; background: #34c759; border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.4); } }
+
+    .hero-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 800;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      animation: fadeUp 0.8s 0.45s cubic-bezier(.23,1,.32,1) both;
+    }
+    .hero-title .gradient-text {
+      background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 1.1rem; color: var(--text-secondary); line-height: 1.7;
+      max-width: 540px; margin: 0 auto 40px;
+      animation: fadeUp 0.8s 0.6s cubic-bezier(.23,1,.32,1) both;
+    }
+
+    /* Service Tags */
+    .service-tags {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+      margin-bottom: 40px;
+      animation: fadeUp 0.8s 0.75s cubic-bezier(.23,1,.32,1) both;
+    }
+    .tag {
+      display: flex; align-items: center; gap: 8px;
+      border-radius: 12px; padding: 9px 16px;
+      font-size: 0.85rem; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; transition: all 0.25s; user-select: none;
+    }
+    .tag.active { color: var(--accent); border-color: rgba(10,132,255,0.4); background: rgba(10,132,255,0.08); }
+    .tag .check {
+      width: 18px; height: 18px; border-radius: 6px;
+      border: 1.5px solid rgba(10,132,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .tag.active .check { background: var(--accent); border-color: var(--accent); }
+    .tag.active .check::after { content: '✓'; color: white; font-size: 11px; font-weight: 700; }
+
+    .hero-btns {
+      display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+      animation: fadeUp 0.8s 0.9s cubic-bezier(.23,1,.32,1) both;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; border: none; border-radius: 14px;
+      padding: 14px 32px; font-size: 1rem; font-weight: 600;
+      cursor: pointer; transition: all 0.25s;
+      box-shadow: 0 6px 24px rgba(10,132,255,0.4);
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(10,132,255,0.5); }
+    .btn-secondary {
+      border-radius: 14px; padding: 14px 32px;
+      font-size: 1rem; font-weight: 600; color: var(--text-primary);
+      cursor: pointer; transition: all 0.25s; border: none;
+    }
+    .btn-secondary:hover { transform: translateY(-2px); }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ─── SECTION COMMONS ─── */
+    section { position: relative; z-index: 1; padding: 100px 24px; }
+    .section-label {
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -1.5px;
+      color: var(--text-primary); margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .section-sub { color: var(--text-secondary); font-size: 1.05rem; max-width: 500px; line-height: 1.7; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-header .section-sub { margin: 0 auto; }
+
+    /* ─── TRUSTED BY ─── */
+    #trusted { padding: 60px 0; overflow: hidden; }
+    .trusted-label {
+      text-align: center; font-size: 0.78rem; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 32px;
+    }
+    .logos-track {
+      display: flex; gap: 60px; align-items: center;
+      animation: scroll 30s linear infinite;
+      width: max-content;
+    }
+    .logos-wrap { overflow: hidden; }
+    @keyframes scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .logo-item {
+      font-family: 'Sora', sans-serif; font-weight: 700;
+      font-size: 1.1rem; color: var(--text-muted);
+      white-space: nowrap; opacity: 0.6;
+      letter-spacing: -0.5px;
+    }
+
+    /* ─── PACKAGES ─── */
+    #packages { max-width: 1200px; margin: 0 auto; }
+    .packages-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; align-items: start;
+    }
+    .package-card {
+      border-radius: 28px; padding: 36px 32px;
+      transition: transform 0.3s ease;
+      position: relative; overflow: hidden;
+    }
+    .package-card:hover { transform: translateY(-8px); }
+    .package-card.featured {
+      background: linear-gradient(145deg, rgba(10,132,255,0.12), rgba(94,92,230,0.12));
+      border-color: rgba(10,132,255,0.35) !important;
+    }
+    .featured-badge {
+      position: absolute; top: 20px; right: 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; font-size: 0.72rem; font-weight: 700;
+      padding: 5px 12px; border-radius: 100px; letter-spacing: 0.5px;
+    }
+    .pkg-icon {
+      width: 52px; height: 52px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 20px;
+      background: rgba(255,255,255,0.7);
+    }
+    .pkg-name {
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.2rem;
+      margin-bottom: 6px; color: var(--text-primary);
+    }
+    .pkg-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.5; }
+    .pkg-price {
+      margin-bottom: 28px;
+    }
+    .pkg-price .amount {
+      font-family: 'Sora', sans-serif; font-size: 2.8rem; font-weight: 800;
+      color: var(--text-primary); letter-spacing: -2px;
+    }
+    .pkg-price .period { font-size: 0.9rem; color: var(--text-muted); }
+    .pkg-features { list-style: none; margin-bottom: 32px; display: flex; flex-direction: column; gap: 12px; }
+    .pkg-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 0.88rem; color: var(--text-secondary);
+    }
+    .pkg-features li .fi {
+      width: 20px; height: 20px; border-radius: 7px;
+      background: rgba(10,132,255,0.1); color: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; flex-shrink: 0; font-weight: 700;
+    }
+    .pkg-btn {
+      width: 100%; padding: 13px; border-radius: 14px; border: none;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: all 0.25s;
+    }
+    .pkg-btn.primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; box-shadow: 0 4px 20px rgba(10,132,255,0.35);
+    }
+    .pkg-btn.primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(10,132,255,0.45); }
+    .pkg-btn.outline { background: transparent; color: var(--accent); border: 1.5px solid rgba(10,132,255,0.35); }
+    .pkg-btn.outline:hover { background: rgba(10,132,255,0.06); }
+
+    /* ─── PORTFOLIO ─── */
+    #portfolio { max-width: 1200px; margin: 0 auto; }
+    .filter-tabs {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 48px;
+    }
+    .filter-tab {
+      border-radius: 100px; padding: 8px 20px;
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; border: none; color: var(--text-secondary);
+    }
+    .filter-tab.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: white; box-shadow: 0 4px 16px rgba(10,132,255,0.3);
+    }
+    .portfolio-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .portfolio-item {
+      border-radius: 20px; overflow: hidden;
+      aspect-ratio: 16/10; position: relative;
+      cursor: pointer; transition: transform 0.3s;
+    }
+    .portfolio-item:hover { transform: scale(1.02); }
+    .portfolio-item:hover .play-btn { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+    .portfolio-thumb {
+      width: 100%; height: 100%; object-fit: cover;
+      background: linear-gradient(135deg, #dce8ff, #e8d4ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.5rem;
+    }
+    .play-btn {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%) scale(0.8);
+      width: 56px; height: 56px; border-radius: 50%;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: all 0.3s;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+      font-size: 1.2rem;
+    }
+    .port-info {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      padding: 16px 20px;
+      background: linear-gradient(to top, rgba(26,26,46,0.7), transparent);
+    }
+    .port-title { color: white; font-size: 0.9rem; font-weight: 600; }
+    .port-cat { color: rgba(255,255,255,0.7); font-size: 0.75rem; margin-top: 2px; }
+
+    /* ─── TEAM ─── */
+    #team { max-width: 900px; margin: 0 auto; }
+    .team-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 700px; margin: 0 auto; }
+    .team-card {
+      border-radius: 28px; padding: 40px 32px;
+      text-align: center; transition: transform 0.3s;
+    }
+    .team-card:hover { transform: translateY(-6px); }
+    .team-photo {
+      width: 110px; height: 110px; border-radius: 50%;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #dce8ff, #e8d4ff);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.8rem; position: relative; overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.8);
+      box-shadow: 0 4px 20px rgba(10,132,255,0.15);
+    }
+    .team-photo img {
+      width: 100%; height: 100%; object-fit: cover;
+      border-radius: 50%;
+    }
+    .team-name {
+      font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.2rem;
+      color: var(--text-primary); margin-bottom: 4px;
+    }
+    .team-role {
+      font-size: 0.85rem; color: var(--accent); font-weight: 600;
+      margin-bottom: 12px;
+    }
+    .team-bio { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+    .team-socials { display: flex; gap: 10px; justify-content: center; }
+    .social-btn {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; transition: all 0.2s; cursor: pointer;
+      text-decoration: none; color: var(--text-secondary);
+    }
+    .social-btn:hover { background: rgba(10,132,255,0.1); color: var(--accent); }
+
+    /* ─── CTA BANNER ─── */
+    #cta {
+      max-width: 1100px; margin: 0 auto;
+      padding: 100px 24px;
+    }
+    .cta-box {
+      border-radius: 36px; padding: 80px 60px;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(10,132,255,0.1), rgba(94,92,230,0.1));
+      border: 1px solid rgba(10,132,255,0.25) !important;
+      position: relative; overflow: hidden;
+    }
+    .cta-box::before {
+      content: '';
+      position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+      width: 400px; height: 300px;
+      background: radial-gradient(ellipse, rgba(10,132,255,0.15), transparent 70%);
+      pointer-events: none;
+    }
+    .cta-title {
+      font-family: 'Sora', sans-serif; font-size: clamp(2rem,4vw,3rem);
+      font-weight: 800; letter-spacing: -1.5px; margin-bottom: 16px;
+    }
+    .cta-sub { color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 36px; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(255,255,255,0.5);
+      padding: 48px 24px;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(20px);
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 20px;
+    }
+    .footer-logo {
+      font-family: 'Sora', sans-serif; font-weight: 800; font-size: 1.1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { color: var(--text-muted); font-size: 0.82rem; }
+
+    /* ─── STATS STRIP ─── */
+    .stats-strip {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 20px; max-width: 700px; margin: 70px auto 0;
+      animation: fadeUp 0.8s 1.05s cubic-bezier(.23,1,.32,1) both;
+    }
+    .stat-item { border-radius: 18px; padding: 20px 24px; text-align: center; }
+    .stat-num {
+      font-family: 'Sora', sans-serif; font-size: 1.9rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+    }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      nav { width: calc(100% - 24px); padding: 12px 16px; }
+      .nav-links { display: none; }
+      .packages-grid, .portfolio-grid { grid-template-columns: 1fr; }
+      .team-grid { grid-template-columns: 1fr; }
+      .stats-strip { grid-template-columns: repeat(3,1fr); gap: 12px; }
+      .cta-box { padding: 48px 28px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-follower" id="follower"></div>
+
+  <!-- Ambient BG -->
+  <div class="ambient">
+    <div class="ambient-orb orb1"></div>
+    <div class="ambient-orb orb2"></div>
+    <div class="ambient-orb orb3"></div>
+    <div class="ambient-orb orb4"></div>
+  </div>
+
+  <!-- ── NAVBAR ── -->
+  <nav class="glass">
+    <div class="nav-logo">✦ Editarmorai</div>
+    <ul class="nav-links">
+      <li><a href="#packages">Packages</a></li>
+      <li><a href="#portfolio">Our Work</a></li>
+      <li><a href="#team">Team</a></li>
+    </ul>
+    <button class="nav-cta" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">Book a Call</button>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="hero-badge glass">
+        <span class="dot"></span>
+        Accepting New Clients — Limited Spots Left
+      </div>
+
+      <h1 class="hero-title">
+        Unlimited Video<br/>
+        Editing <span class="gradient-text">Powered by AI</span>
+      </h1>
+      <p class="hero-sub">
+        Professional video editing, unlimited requests, and results that drive engagement — all for one flat monthly fee.
+      </p>
+
+      <div class="service-tags">
+        <div class="tag glass active" onclick="toggleTag(this)"><span class="check"></span>YouTube Videos</div>
+        <div class="tag glass active" onclick="toggleTag(this)"><span class="check"></span>Reels / Shorts</div>
+        <div class="tag glass" onclick="toggleTag(this)"><span class="check"></span>Podcast Editing</div>
+        <div class="tag glass active" onclick="toggleTag(this)"><span class="check"></span>Video Ads</div>
+        <div class="tag glass" onclick="toggleTag(this)"><span class="check"></span>Social Media Clips</div>
+        <div class="tag glass" onclick="toggleTag(this)"><span class="check"></span>UGC Content</div>
+        <div class="tag glass" onclick="toggleTag(this)"><span class="check"></span>Corporate Videos</div>
+      </div>
+
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="document.getElementById('cta').scrollIntoView({behavior:'smooth'})">🚀 Book a Free Call</button>
+        <button class="btn-secondary glass" onclick="document.getElementById('portfolio').scrollIntoView({behavior:'smooth'})">See Our Work →</button>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-item glass">
+          <div class="stat-num">500+</div>
+          <div class="stat-label">Videos Delivered</div>
+        </div>
+        <div class="stat-item glass">
+          <div class="stat-num">48h</div>
+          <div class="stat-label">Avg Turnaround</div>
+        </div>
+        <div class="stat-item glass">
+          <div class="stat-num">98%</div>
+          <div class="stat-label">Client Satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TRUSTED BY ── -->
+  <section id="trusted">
+    <div class="trusted-label">Trusted by leading brands & creators</div>
+    <div class="logos-wrap">
+      <div class="logos-track">
+        <span class="logo-item">TechBrand Studio</span>
+        <span class="logo-item">NovaCraft Media</span>
+        <span class="logo-item">PixelEdge Co.</span>
+        <span class="logo-item">SkylineAds</span>
+        <span class="logo-item">CreatorHub</span>
+        <span class="logo-item">Visionary Films</span>
+        <span class="logo-item">DigitalPulse</span>
+        <span class="logo-item">EchoReels</span>
+        <!-- duplicate for seamless loop -->
+        <span class="logo-item">TechBrand Studio</span>
+        <span class="logo-item">NovaCraft Media</span>
+        <span class="logo-item">PixelEdge Co.</span>
+        <span class="logo-item">SkylineAds</span>
+        <span class="logo-item">CreatorHub</span>
+        <span class="logo-item">Visionary Films</span>
+        <span class="logo-item">DigitalPulse</span>
+        <span class="logo-item">EchoReels</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PACKAGES ── -->
+  <section id="packages">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="section-header">
+        <p class="section-label">Pricing</p>
+        <h2 class="section-title">Simple, Flat-Rate Plans</h2>
+        <p class="section-sub">No surprises. One subscription, unlimited creativity. Cancel anytime.</p>
+      </div>
+      <div class="packages-grid">
+
+        <!-- Starter -->
+        <div class="package-card glass">
+          <div class="pkg-icon">⚡</div>
+          <div class="pkg-name">Starter</div>
+          <div class="pkg-desc">Perfect for content creators just getting started with consistent video output.</div>
+          <div class="pkg-price">
+            <span class="amount">$299</span>
+            <span class="period"> / month</span>
+          </div>
+          <ul class="pkg-features">
+            <li><span class="fi">✓</span> Up to 8 videos/month</li>
+            <li><span class="fi">✓</span> Reels &amp; Shorts editing</li>
+            <li><span class="fi">✓</span> Social media clips</li>
+            <li><span class="fi">✓</span> Basic color grading</li>
+            <li><span class="fi">✓</span> 3-day turnaround</li>
+            <li><span class="fi">✓</span> 2 revision rounds</li>
+          </ul>
+          <button class="pkg-btn outline">Get Started</button>
+        </div>
+
+        <!-- Growth (Featured) -->
+        <div class="package-card glass featured">
+          <div class="featured-badge">Most Popular</div>
+          <div class="pkg-icon">🚀</div>
+          <div class="pkg-name">Growth</div>
+          <div class="pkg-desc">For brands &amp; creators scaling their video presence across all platforms.</div>
+          <div class="pkg-price">
+            <span class="amount">$599</span>
+            <span class="period"> / month</span>
+          </div>
+          <ul class="pkg-features">
+            <li><span class="fi">✓</span> Up to 20 videos/month</li>
+            <li><span class="fi">✓</span> YouTube long-form editing</li>
+            <li><span class="fi">✓</span> Podcast video editing</li>
+            <li><span class="fi">✓</span> Video ads &amp; UGC content</li>
+            <li><span class="fi">✓</span> Advanced color grading</li>
+            <li><span class="fi">✓</span> Motion graphics &amp; captions</li>
+            <li><span class="fi">✓</span> 48h turnaround</li>
+            <li><span class="fi">✓</span> Unlimited revisions</li>
+          </ul>
+          <button class="pkg-btn primary">Get Started</button>
+        </div>
+
+        <!-- Pro -->
+        <div class="package-card glass">
+          <div class="pkg-icon">👑</div>
+          <div class="pkg-name">Pro</div>
+          <div class="pkg-desc">Enterprise-grade editing for agencies and high-volume content operations.</div>
+          <div class="pkg-price">
+            <span class="amount">$999</span>
+            <span class="period"> / month</span>
+          </div>
+          <ul class="pkg-features">
+            <li><span class="fi">✓</span> Unlimited videos</li>
+            <li><span class="fi">✓</span> All video types covered</li>
+            <li><span class="fi">✓</span> Corporate &amp; brand videos</li>
+            <li><span class="fi">✓</span> AI-enhanced editing</li>
+            <li><span class="fi">✓</span> Dedicated editor assigned</li>
+            <li><span class="fi">✓</span> 24h priority turnaround</li>
+            <li><span class="fi">✓</span> Unlimited revisions</li>
+            <li><span class="fi">✓</span> Slack / WhatsApp support</li>
+          </ul>
+          <button class="pkg-btn outline">Get Started</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PORTFOLIO ── -->
+  <section id="portfolio">
+    <div style="max-width:1200px;margin:0 auto">
+      <div class="section-header">
+        <p class="section-label">Our Work</p>
+        <h2 class="section-title">Edits That Speak Louder</h2>
+        <p class="section-sub">A glimpse into the content we've crafted for creators and brands worldwide.</p>
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab glass active" onclick="filterPort(this,'all')">All</button>
+        <button class="filter-tab glass" onclick="filterPort(this,'youtube')">YouTube</button>
+        <button class="filter-tab glass" onclick="filterPort(this,'reels')">Reels</button>
+        <button class="filter-tab glass" onclick="filterPort(this,'ads')">Video Ads</button>
+        <button class="filter-tab glass" onclick="filterPort(this,'podcast')">Podcast</button>
+      </div>
+      <div class="portfolio-grid" id="portGrid">
+        <div class="portfolio-item glass" data-cat="youtube">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#dce8ff,#b4c8ff);">🎬</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Tech Review — Full Edit</div><div class="port-cat">YouTube Video</div></div>
+        </div>
+        <div class="portfolio-item glass" data-cat="reels">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#fde8ff,#f4b4ff);">🎞</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Brand Reel — 30s Cut</div><div class="port-cat">Reels / Shorts</div></div>
+        </div>
+        <div class="portfolio-item glass" data-cat="ads">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#e8fff0,#b4ffcc);">📱</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Product Launch Ad</div><div class="port-cat">Video Ad</div></div>
+        </div>
+        <div class="portfolio-item glass" data-cat="podcast">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#fff8dc,#ffecb4);">🎙</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Podcast Ep. 42 Edit</div><div class="port-cat">Podcast</div></div>
+        </div>
+        <div class="portfolio-item glass" data-cat="reels">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#ffe8e8,#ffb4b4);">✨</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Lifestyle Creator Cut</div><div class="port-cat">Reels / Shorts</div></div>
+        </div>
+        <div class="portfolio-item glass" data-cat="youtube">
+          <div class="portfolio-thumb" style="background:linear-gradient(135deg,#e8f4ff,#c4e0ff);">🏢</div>
+          <div class="play-btn">▶</div>
+          <div class="port-info"><div class="port-title">Corporate Brand Story</div><div class="port-cat">YouTube / Corporate</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TEAM ── -->
+  <section id="team">
+    <div class="section-header">
+      <p class="section-label">The Team</p>
+      <h2 class="section-title">The Minds Behind the Magic</h2>
+      <p class="section-sub">Passionate editors obsessed with storytelling, quality, and your growth.</p>
+    </div>
+    <div class="team-grid">
+
+      <div class="team-card glass">
+        <div class="team-photo">
+          <!-- REPLACE with: <img src="harshit.jpg" alt="Harshit Jain"> -->
+          👨‍💻
+        </div>
+        <div class="team-name">Harshit Jain</div>
+        <div class="team-role">Founder & Creative Director</div>
+        <div class="team-bio">Visionary editor with a passion for storytelling. Leads the creative strategy and ensures every video exceeds expectations.</div>
+        <div class="team-socials">
+          <a class="social-btn glass" href="#" title="LinkedIn">in</a>
+          <a class="social-btn glass" href="#" title="Instagram">ig</a>
+          <a class="social-btn glass" href="#" title="Twitter">𝕏</a>
+        </div>
+      </div>
+
+      <div class="team-card glass">
+        <div class="team-photo">
+          <!-- REPLACE with: <img src="nikhil.jpg" alt="Nikhil Gyan"> -->
+          👨‍🎨
+        </div>
+        <div class="team-name">Nikhil Gyan</div>
+        <div class="team-role">Co-Founder & Head of Production</div>
+        <div class="team-bio">Production expert driving quality, timelines, and client satisfaction. Ensures every project is delivered flawlessly.</div>
+        <div class="team-socials">
+          <a class="social-btn glass" href="#" title="LinkedIn">in</a>
+          <a class="social-btn glass" href="#" title="Instagram">ig</a>
+          <a class="social-btn glass" href="#" title="Twitter">𝕏</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── CTA ── -->
+  <section id="cta">
+    <div class="cta-box glass">
+      <p class="section-label" style="text-align:center">Get Started Today</p>
+      <h2 class="cta-title">Ready to Transform<br/><span style="background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Your Video Content?</span></h2>
+      <p class="cta-sub">Book a free 30-minute strategy call. We'll map out exactly how we can elevate your brand through video.</p>
+      <button class="btn-primary" style="font-size:1.05rem;padding:16px 40px;">📅 Book Your Free Call</button>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">✦ Editarmorai</div>
+      <div class="footer-links">
+        <a href="#packages">Packages</a>
+        <a href="#portfolio">Work</a>
+        <a href="#team">Team</a>
+        <a href="mailto:hello@editarmorai.com">Contact</a>
+      </div>
+      <div class="footer-copy">© 2025 Editarmorai. All rights reserved.</div>
+    </div>
+  </footer>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const follower = document.getElementById('follower');
+    let mx = 0, my = 0, fx = 0, fy = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+    });
+    function animFollower() {
+      fx += (mx - fx - 18) * 0.12;
+      fy += (my - fy - 18) * 0.12;
+      follower.style.transform = `translate(${fx}px, ${fy}px)`;
+      requestAnimationFrame(animFollower);
+    }
+    animFollower();
+
+    // Tag toggle
+    function toggleTag(el) {
+      el.classList.toggle('active');
+    }
+
+    // Portfolio filter
+    function filterPort(btn, cat) {
+      document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.portfolio-item').forEach(item => {
+        item.style.display = (cat === 'all' || item.dataset.cat === cat) ? 'block' : 'none';
+      });
+    }
+
+    // Scroll reveal
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.package-card, .portfolio-item, .team-card, .stat-item').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(30px)';
+      el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
