@@ -576,84 +576,228 @@
   </section>
 
   <!-- ── PACKAGES ── -->
-  <section id="packages">
-    <div style="max-width:1200px;margin:0 auto">
-      <div class="section-header">
-        <p class="section-label">Pricing</p>
-        <h2 class="section-title">Simple, Flat-Rate Plans</h2>
-        <p class="section-sub">No surprises. One subscription, unlimited creativity. Cancel anytime.</p>
+<section id="packages">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="section-header">
+      <p class="section-label">Pricing</p>
+      <h2 class="section-title">Choose Your Package</h2>
+      <p class="section-sub">Click any package to explore the 4 tiers inside. No hidden fees, no surprises.</p>
+    </div>
+
+    <div class="pkg-cards-row">
+
+      <!-- CARD 1: Reels -->
+      <div class="pkg-main-card glass" onclick="toggleTiers('reels', this)">
+        <div class="pkg-main-icon">🎬</div>
+        <div class="pkg-main-name">Reels / Shorts / Vertical</div>
+        <div class="pkg-main-desc">High-impact short form content for Instagram, YouTube Shorts & TikTok.</div>
+        <div class="pkg-main-range">₹5,000 — ₹25,000 / month</div>
+        <div class="pkg-expand-hint">Tap to explore tiers ↓</div>
       </div>
-      <div class="packages-grid">
 
-        <!-- Starter -->
-        <div class="package-card glass">
-          <div class="pkg-icon">⚡</div>
-          <div class="pkg-name">Starter</div>
-          <div class="pkg-desc">Perfect for content creators just getting started with consistent video output.</div>
-          <div class="pkg-price">
-            <span class="amount">$299</span>
-            <span class="period"> / month</span>
-          </div>
-          <ul class="pkg-features">
-            <li><span class="fi">✓</span> Up to 8 videos/month</li>
-            <li><span class="fi">✓</span> Reels &amp; Shorts editing</li>
-            <li><span class="fi">✓</span> Social media clips</li>
-            <li><span class="fi">✓</span> Basic color grading</li>
-            <li><span class="fi">✓</span> 3-day turnaround</li>
-            <li><span class="fi">✓</span> 2 revision rounds</li>
-          </ul>
-          <button class="pkg-btn outline">Get Started</button>
-        </div>
+      <!-- CARD 2: YouTube -->
+      <div class="pkg-main-card glass" onclick="toggleTiers('youtube', this)">
+        <div class="pkg-main-icon">📺</div>
+        <div class="pkg-main-name">YouTube / Long Form / Horizontal</div>
+        <div class="pkg-main-desc">Professional long-form editing for YouTube channels and branded content.</div>
+        <div class="pkg-main-range">Coming Soon</div>
+        <div class="pkg-expand-hint">Tap to explore tiers ↓</div>
+      </div>
 
-        <!-- Growth (Featured) -->
-        <div class="package-card glass featured">
-          <div class="featured-badge">Most Popular</div>
-          <div class="pkg-icon">🚀</div>
-          <div class="pkg-name">Growth</div>
-          <div class="pkg-desc">For brands &amp; creators scaling their video presence across all platforms.</div>
-          <div class="pkg-price">
-            <span class="amount">$599</span>
-            <span class="period"> / month</span>
-          </div>
-          <ul class="pkg-features">
-            <li><span class="fi">✓</span> Up to 20 videos/month</li>
-            <li><span class="fi">✓</span> YouTube long-form editing</li>
-            <li><span class="fi">✓</span> Podcast video editing</li>
-            <li><span class="fi">✓</span> Video ads &amp; UGC content</li>
-            <li><span class="fi">✓</span> Advanced color grading</li>
-            <li><span class="fi">✓</span> Motion graphics &amp; captions</li>
-            <li><span class="fi">✓</span> 48h turnaround</li>
-            <li><span class="fi">✓</span> Unlimited revisions</li>
-          </ul>
-          <button class="pkg-btn primary">Get Started</button>
-        </div>
+      <!-- CARD 3: Both -->
+      <div class="pkg-main-card glass" onclick="toggleTiers('both', this)">
+        <div class="pkg-main-icon">👑</div>
+        <div class="pkg-main-name">Both — Long Form & Short Form</div>
+        <div class="pkg-main-desc">The complete package. Dominate every platform with all formats covered.</div>
+        <div class="pkg-main-range">Coming Soon</div>
+        <div class="pkg-expand-hint">Tap to explore tiers ↓</div>
+      </div>
 
-        <!-- Pro -->
-        <div class="package-card glass">
-          <div class="pkg-icon">👑</div>
-          <div class="pkg-name">Pro</div>
-          <div class="pkg-desc">Enterprise-grade editing for agencies and high-volume content operations.</div>
-          <div class="pkg-price">
-            <span class="amount">$999</span>
-            <span class="period"> / month</span>
-          </div>
-          <ul class="pkg-features">
-            <li><span class="fi">✓</span> Unlimited videos</li>
-            <li><span class="fi">✓</span> All video types covered</li>
-            <li><span class="fi">✓</span> Corporate &amp; brand videos</li>
-            <li><span class="fi">✓</span> AI-enhanced editing</li>
-            <li><span class="fi">✓</span> Dedicated editor assigned</li>
-            <li><span class="fi">✓</span> 24h priority turnaround</li>
-            <li><span class="fi">✓</span> Unlimited revisions</li>
-            <li><span class="fi">✓</span> Slack / WhatsApp support</li>
-          </ul>
-          <button class="pkg-btn outline">Get Started</button>
-        </div>
+    </div>
 
+    <!-- TIERS: Reels -->
+    <div class="tiers-grid" id="tiers-reels">
+      <div class="tier-card glass">
+        <div class="tier-badge" style="background:rgba(10,132,255,0.1);color:#0a84ff;">A — Basic</div>
+        <div class="tier-price">₹5,000<span>/mo</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">✓</span> 5 Videos</li>
+          <li><span class="fi">✓</span> 45 Second Duration</li>
+          <li><span class="fi">✓</span> 1 Revision</li>
+          <li><span class="fi">✓</span> 3-4 Days Deadline</li>
+          <li><span class="fi">✓</span> Cutting / Trimming</li>
+          <li><span class="fi">✓</span> Basic Color Correction</li>
+          <li><span class="fi">✓</span> Clean Captions</li>
+          <li><span class="fi">✓</span> Background Music</li>
+          <li><span class="fi">✓</span> Light Transitions</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Reels%20Basic%20Plan" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Get Started</button></a>
+      </div>
+
+      <div class="tier-card glass">
+        <div class="tier-badge" style="background:rgba(94,92,230,0.1);color:#5e5ce6;">b — Enhanced</div>
+        <div class="tier-price">₹10,000<span>/mo</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">✓</span> 5 Videos</li>
+          <li><span class="fi">✓</span> 60 Second Duration</li>
+          <li><span class="fi">✓</span> 2 Revisions</li>
+          <li><span class="fi">✓</span> Dynamic Captions</li>
+          <li><span class="fi">✓</span> 3-4 Days Deadline</li>
+          <li><span class="fi">✓</span> Zoom-ins & Punch Edits</li>
+          <li><span class="fi">✓</span> Sound Effects</li>
+          <li><span class="fi">✓</span> Hook Text Animation</li>
+          <li><span class="fi">✓</span> Slight Motion Graphics</li>
+          <li><span class="fi">✓</span> Better Pacing</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Reels%20Enhanced%20Plan" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Get Started</button></a>
+      </div>
+
+      <div class="tier-card glass featured">
+        <div class="featured-badge">Most Popular</div>
+        <div class="tier-badge" style="background:rgba(50,173,230,0.1);color:#32ade6;">c — Premium</div>
+        <div class="tier-price">₹20,000<span>/mo</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">✓</span> 5 Videos</li>
+          <li><span class="fi">✓</span> Up to 60 Second Duration</li>
+          <li><span class="fi">✓</span> 3-4 Revisions</li>
+          <li><span class="fi">✓</span> 3-4 Days Deadline</li>
+          <li><span class="fi">✓</span> Advanced Subtitle Animation</li>
+          <li><span class="fi">✓</span> Pattern Interrupts</li>
+          <li><span class="fi">✓</span> Meme Inserts</li>
+          <li><span class="fi">✓</span> Stock Overlays</li>
+          <li><span class="fi">✓</span> Motion Graphics</li>
+          <li><span class="fi">✓</span> Advanced Color Grade</li>
+          <li><span class="fi">✓</span> Strong Hook Structuring</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Reels%20Premium%20Plan" target="_blank" style="text-decoration:none;"><button class="pkg-btn primary">Get Started</button></a>
+      </div>
+
+      <div class="tier-card glass">
+        <div class="tier-badge" style="background:rgba(255,180,0,0.1);color:#f0a000;">D — Elite</div>
+        <div class="tier-price">₹25,000<span>/mo</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">✓</span> 5 Videos</li>
+          <li><span class="fi">✓</span> Up to 60 Second Duration</li>
+          <li><span class="fi">✓</span> Unlimited Revisions</li>
+          <li><span class="fi">✓</span> 3-4 Days Deadline</li>
+          <li><span class="fi">✓</span> Custom Animations</li>
+          <li><span class="fi">✓</span> Heavy Motion Graphics</li>
+          <li><span class="fi">✓</span> Script-Based Editing</li>
+          <li><span class="fi">✓</span> Ad Structure</li>
+          <li><span class="fi">✓</span> Motion Graphics</li>
+          <li><span class="fi">✓</span> Cinematic Sound Design</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Reels%20Elite%20Plan" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Get Started</button></a>
       </div>
     </div>
-  </section>
 
+    <!-- TIERS: YouTube (placeholder) -->
+    <div class="tiers-grid" id="tiers-youtube">
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(10,132,255,0.1);color:#0a84ff;">A — Basic</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> Long-form editing</li>
+          <li><span class="fi">⏳</span> YouTube optimised cuts</li>
+          <li><span class="fi">⏳</span> Chapter markers</li>
+          <li><span class="fi">⏳</span> Basic color grade</li>
+          <li><span class="fi">⏳</span> Background music</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20YouTube%20editing%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(94,92,230,0.1);color:#5e5ce6;">b — Enhanced</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Basic features</li>
+          <li><span class="fi">⏳</span> Advanced transitions</li>
+          <li><span class="fi">⏳</span> Intro & outro</li>
+          <li><span class="fi">⏳</span> Sound design</li>
+          <li><span class="fi">⏳</span> Thumbnail guidance</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20YouTube%20editing%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(50,173,230,0.1);color:#32ade6;">c — Premium</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Enhanced features</li>
+          <li><span class="fi">⏳</span> Motion graphics</li>
+          <li><span class="fi">⏳</span> Custom animations</li>
+          <li><span class="fi">⏳</span> B-roll integration</li>
+          <li><span class="fi">⏳</span> Retention editing</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20YouTube%20editing%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(255,180,0,0.1);color:#f0a000;">D — Elite</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Premium features</li>
+          <li><span class="fi">⏳</span> Dedicated editor</li>
+          <li><span class="fi">⏳</span> Script structuring</li>
+          <li><span class="fi">⏳</span> Cinematic grade</li>
+          <li><span class="fi">⏳</span> Priority delivery</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20YouTube%20editing%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+    </div>
+
+    <!-- TIERS: Both (placeholder) -->
+    <div class="tiers-grid" id="tiers-both">
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(10,132,255,0.1);color:#0a84ff;">A — Basic</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> Reels + YouTube editing</li>
+          <li><span class="fi">⏳</span> Multi-platform delivery</li>
+          <li><span class="fi">⏳</span> Basic color grade</li>
+          <li><span class="fi">⏳</span> Captions included</li>
+          <li><span class="fi">⏳</span> Background music</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Both%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(94,92,230,0.1);color:#5e5ce6;">b — Enhanced</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Basic features</li>
+          <li><span class="fi">⏳</span> Hook animations</li>
+          <li><span class="fi">⏳</span> Sound effects</li>
+          <li><span class="fi">⏳</span> Dynamic captions</li>
+          <li><span class="fi">⏳</span> Better pacing</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Both%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(50,173,230,0.1);color:#32ade6;">c — Premium</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Enhanced features</li>
+          <li><span class="fi">⏳</span> Motion graphics</li>
+          <li><span class="fi">⏳</span> Meme inserts</li>
+          <li><span class="fi">⏳</span> Stock overlays</li>
+          <li><span class="fi">⏳</span> Advanced color grade</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Both%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+      <div class="tier-card glass" style="opacity:0.7">
+        <div class="tier-badge" style="background:rgba(255,180,0,0.1);color:#f0a000;">D — Elite</div>
+        <div class="tier-price">Coming<span> Soon</span></div>
+        <ul class="tier-features">
+          <li><span class="fi">⏳</span> All Premium features</li>
+          <li><span class="fi">⏳</span> Custom animations</li>
+          <li><span class="fi">⏳</span> Cinematic sound design</li>
+          <li><span class="fi">⏳</span> Script-based editing</li>
+          <li><span class="fi">⏳</span> Dedicated editor</li>
+        </ul>
+        <a href="https://wa.me/919399818882?text=Hi!%20I'm%20interested%20in%20Both%20packages" target="_blank" style="text-decoration:none;"><button class="pkg-btn outline">Enquire Now</button></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+  
   <!-- ── PORTFOLIO ── -->
   <section id="portfolio">
     <div style="max-width:1200px;margin:0 auto">
